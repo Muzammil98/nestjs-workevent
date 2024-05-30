@@ -1,15 +1,45 @@
-FROM node:20
+# BUILD FOR DEVELOPMENT
+
+FROM node:20-alpine As development
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY --chown=node:node package*.json ./
 
-RUN npm install
+RUN npm ci
 
-COPY . .
+COPY --chown=node:node . .
+
+USER node
+
+# BUILD FOR PRODUCTION
+
+FROM node:20-alpine As build
+
+WORKDIR /app
+
+COPY --chown=node:node package*.json ./
+
+COPY --chown=node:node --from=development /app/node_modules ./node_modules
+
+COPY --chown=node:node . .
 
 RUN npm run build
 
-# EXPOSE 3000
+ENV NODE_ENV production
 
-CMD ["node", "dist/main.js"]
+RUN npm ci --only=production && npm cache clean --force
+
+USER node
+
+# PRODUCTION
+
+FROM node:20-alpine As production
+
+COPY --chown=node:node --from=build /app/node_modules ./node_modules
+COPY --chown=node:node --from=build /app/dist ./dist
+
+CMD [ "node", "dist/main.js" ]
+
+#docker built -t name .
+#docker run -d -p 80:3000 name
