@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { WorkeventDTO } from './dto/create-workevent.dto';
 import { UpdateWorkeventDto } from './dto/update-workevent.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,10 +16,16 @@ export class WorkeventService {
   ) {}
 
   async create(workeventDTO: WorkeventDTO): Promise<void> {
-    // console.log(workeventDTO);
     const foundUser = await this.userRepo.findOneBy({
       id: workeventDTO.userId,
     });
+
+    if (!foundUser) {
+      throw new HttpException(
+        'User not found, cannot create workevent',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     for (let i = 0; i < workeventDTO.workevents.length; i++) {
       const item = workeventDTO.workevents[i];
@@ -72,10 +78,6 @@ export class WorkeventService {
     const res = await this.repo.findOneBy({ id });
     return res;
   }
-
-  // update(id: number, updateWorkeventDto: UpdateWorkeventDto) {
-  //   return `This action updates a #${id} workevent`;
-  // }
 
   async remove(id: string): Promise<void> {
     await this.repo.delete({ id });
