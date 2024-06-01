@@ -42,4 +42,4 @@ COPY --chown=node:node --from=build /app/dist ./dist
 CMD [ "node", "dist/main.js" ]
 
 #docker built -t name .
-#docker run -d -p 80:3000 name
+#docker run --env-file .env -p 3000:3000 --net my-network nest-workevent
