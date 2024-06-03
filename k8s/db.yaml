@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: cicd-demo-postgres
+    app.kubernetes.io/instance: cicd-demo-postgres-instance
+    app.kubernetes.io/version: '1.0.0'
+    app.kubernetes.io/managed-by: kubectl
+  name: cicd-demo-postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cicd-demo-postgres
+  template:
+    metadata:
+      labels:
+        app: cicd-demo-postgres
+    spec:
+      containers:
+      - image: postgres
+        imagePullPolicy: Always
+        name: cicd-demo-postgres
+        ports:
+        - containerPort: 5432
